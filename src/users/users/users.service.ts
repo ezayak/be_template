@@ -1,26 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { User, UserRoles } from './user.model';
-import { v4 as uuid } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersFilterDto } from './dto/users-filter.dto';
+import { UserRoles } from './user-roles';
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [
-    {
-      id: '842a9985-9fd3-4db5-8547-b0993a518dc7',
-      name: 'Olena',
-      lastname: 'Grynevych',
-      role: UserRoles.amdin,
-    },
-  ];
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
 
-  getAllUsers(): User[] {
-    return this.users;
-  }
-
-  getUserById(id: string): User {
-    const user = this.users.find((user) => user.id === id);
+  async getUserById(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException();
@@ -29,48 +23,67 @@ export class UsersService {
     return user;
   }
 
-  createUser(createUserDto: CreateUserDto): User {
+  async getUsers(filterDto: UsersFilterDto): Promise<User[]> {
+    const { search, role } = filterDto;
+    const query = this.userRepository.createQueryBuilder('users');
+
+    if (role) {
+      query.andWhere('users.role = :role', { role });
+    }
+
+    if (search) {
+      query.andWhere(
+        'LOWER(users.name) LIKE :search OR LOWER(users.lastname) LIKE :search',
+        {
+          search: `%${search.toLowerCase()}%`,
+        },
+      );
+    }
+
+    const users = await query.getMany();
+    return users;
+  }
+
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { name, lastname, role } = createUserDto;
-    const user: User = {
-      id: uuid(),
+    const userData = {
       name,
       lastname,
       role,
     };
 
-    this.users.push(user);
-
+    const user = this.userRepository.create(userData);
+    await this.userRepository.save(user);
     return user;
   }
 
-  deleteUser(id: string): boolean {
-    const findIndex = this.users.findIndex((user) => user.id === id);
+  async deleteUser(id: string): Promise<boolean> {
+    const result = await this.userRepository.delete(id);
 
-    if (findIndex === -1) {
+    if (result.affected === 0) {
       throw new NotFoundException();
     }
 
-    this.users.splice(findIndex);
     return true;
   }
 
-  updateUser(updateUserDto: UpdateUserDto): boolean {
-    const findIndex = this.users.findIndex(
-      (user) => user.id === updateUserDto.id,
-    );
+  // updateUser(updateUserDto: UpdateUserDto): boolean {
+  //   const findIndex = this.users.findIndex(
+  //     (user) => user.id === updateUserDto.id,
+  //   );
 
-    if (findIndex === -1) {
-      throw new NotFoundException();
-    }
+  //   if (findIndex === -1) {
+  //     throw new NotFoundException();
+  //   }
 
-    this.users[findIndex] = updateUserDto;
-    return true;
-  }
+  //   this.users[findIndex] = updateUserDto;
+  //   return true;
+  // }
 
-  updateRole(id: string, role: UserRoles): boolean {
-    const user = this.getUserById(id);
-    user['role'] = role;
-
+  async updateRole(id: string, role: UserRoles): Promise<boolean> {
+    const user = await this.getUserById(id);
+    user.role = role;
+    await this.userRepository.save(user);
     return true;
   }
 }

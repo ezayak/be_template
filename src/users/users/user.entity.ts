@@ -1,17 +1,17 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { UserRoles } from './user.model';
+import { UserRoles } from './user-roles';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('varchar', { length: 200 })
   name: string;
 
-  @Column()
+  @Column('varchar', { length: 200 })
   lastname: string;
 
-  @Column()
+  @Column('varchar', { length: 64 })
   role: UserRoles;
 }

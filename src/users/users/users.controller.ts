@@ -6,14 +6,13 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { GetUsersFilterDto } from './dto/get-users-filter.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersFilterDto } from './dto/users-filter.dto';
 import { UserRoleDto } from './dto/user-role.dto';
-import { User, UserRoles } from './user.model';
+import { User } from './user.entity';
+
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -21,65 +20,35 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get()
-  getUsers(@Query() filterDto: GetUsersFilterDto): User[] {
-    if (Object.keys(filterDto).length) {
-      return this.getUsersByFilter(filterDto);
-    } else {
-      return this.usersService.getAllUsers();
-    }
-  }
-
-  getUsersByFilter(filterDto: GetUsersFilterDto): User[] {
-    let users = this.usersService.getAllUsers();
-    const { search, role } = filterDto;
-
-    if (search) {
-      console.log('lena-dev search', search);
-
-      users = users.filter((user) => {
-        if (
-          user.name.toLowerCase().includes(search.toLowerCase()) ||
-          user.lastname.toLowerCase().includes(search.toLowerCase())
-        ) {
-          return true;
-        }
-
-        return false;
-      });
-    }
-
-    if (role) {
-      users = users.filter((user) => user.role === role);
-    }
-
-    return users;
+  getUsers(@Query() filterDto: UsersFilterDto): Promise<User[]> {
+    return this.usersService.getUsers(filterDto);
   }
 
   @Get('/:id')
-  getUserById(@Param('id') id: string): User {
+  getUserById(@Param('id') id: string): Promise<User> {
     return this.usersService.getUserById(id);
   }
 
   @Post()
-  createUser(@Body() createUserDto: CreateUserDto): User {
+  createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.usersService.createUser(createUserDto);
   }
 
   @Delete('/:id')
-  deleteUser(@Param('id') id: string): boolean {
+  deleteUser(@Param('id') id: string): Promise<boolean> {
     return this.usersService.deleteUser(id);
   }
 
-  @Put()
-  updateUser(@Body() updateUser: UpdateUserDto): boolean {
-    return this.usersService.updateUser(updateUser);
-  }
+  // @Put()
+  // updateUser(@Body() updateUser: UpdateUserDto): boolean {
+  //   return this.usersService.updateUser(updateUser);
+  // }
 
   @Patch('/:id/role')
   changeUserRole(
     @Param('id') id: string,
     @Body() userRoleDto: UserRoleDto,
-  ): boolean {
+  ): Promise<boolean> {
     const { role } = userRoleDto;
     return this.usersService.updateRole(id, role);
   }
