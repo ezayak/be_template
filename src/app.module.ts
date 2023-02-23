@@ -3,6 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { NestModule } from '@nestjs/common';
+import { PreauthMiddlewear } from './auth/preauth.middlewear';
+//will be changed
 
 @Module({
   imports: [
