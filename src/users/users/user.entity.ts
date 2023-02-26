@@ -14,4 +14,7 @@ export class User {
 
   @Column('varchar', { length: 64 })
   role: UserRoles;
+
+  @Column('varchar', { length: 32 })
+  phoneNumber: string;
 }

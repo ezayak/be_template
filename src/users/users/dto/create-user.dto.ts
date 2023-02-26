@@ -11,4 +11,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsEnum(UserRoles)
   role: UserRoles;
+
+  @IsNotEmpty()
+  phoneNumber: string;
 }

@@ -1,10 +1,10 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { NestModule } from '@nestjs/common';
-import { PreauthMiddlewear } from './auth/preauth.middlewear';
+import { AuthStrategy } from './auth/auth.strategy';
 
 @Module({
   imports: [
@@ -18,22 +18,10 @@ import { PreauthMiddlewear } from './auth/preauth.middlewear';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    PassportModule,
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AuthStrategy],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(PreauthMiddlewear)
-      .exclude({
-        path: 'admin/users',
-        method: RequestMethod.POST,
-      })
-      .forRoutes({
-        path: 'admin/*',
-        method: RequestMethod.ALL,
-      });
-  }
-}
+export class AppModule {}

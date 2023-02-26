@@ -45,11 +45,12 @@ export class UsersService {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { name, lastname, role } = createUserDto;
+    const { name, lastname, role, phoneNumber } = createUserDto;
     const userData = {
       name,
       lastname,
       role,
+      phoneNumber,
     };
 
     const user = this.userRepository.create(userData);

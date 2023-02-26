@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
-import * as serviceAccount from './firebaseServiceAccount.json';
+import * as serviceAccount from './secret-keys/firebaseServiceAccount.json';
 import { Response } from 'express';
 //will be changed
 
