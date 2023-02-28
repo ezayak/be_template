@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { RolesService } from '../roles/roles.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersFilterDto } from './dto/users-filter.dto';
-import { UserRoles } from './user-roles';
 import { User } from './user.entity';
 
 @Injectable()
@@ -11,6 +11,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @Inject(RolesService)
+    private rolesSerive: RolesService,
   ) {}
 
   async getUserById(id: string): Promise<User> {
@@ -46,10 +48,11 @@ export class UsersService {
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { name, lastname, role, phoneNumber } = createUserDto;
+    const roleObject = await this.rolesSerive.getRoleById(role);
     const userData = {
       name,
       lastname,
-      role,
+      role: roleObject,
       phoneNumber,
     };
 
@@ -81,9 +84,10 @@ export class UsersService {
   //   return true;
   // }
 
-  async updateRole(id: string, role: UserRoles): Promise<boolean> {
+  async updateRole(id: string, role: string): Promise<boolean> {
     const user = await this.getUserById(id);
-    user.role = role;
+    const roleObject = await this.rolesSerive.getRoleById(role);
+    user.role = roleObject;
     await this.userRepository.save(user);
     return true;
   }

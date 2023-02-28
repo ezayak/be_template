@@ -4,7 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthStrategy } from './auth/auth.strategy';
+import { RolesModule } from './users/roles/roles.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,10 +19,11 @@ import { AuthStrategy } from './auth/auth.strategy';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    PassportModule,
     UsersModule,
+    RolesModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuthStrategy],
+  providers: [AppService],
 })
 export class AppModule {}

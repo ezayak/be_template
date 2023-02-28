@@ -1,5 +1,4 @@
-import { IsEnum, IsNotEmpty } from 'class-validator';
-import { UserRoles } from '../user-roles';
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -9,8 +8,7 @@ export class CreateUserDto {
   lastname: string;
 
   @IsNotEmpty()
-  @IsEnum(UserRoles)
-  role: UserRoles;
+  role: string;
 
   @IsNotEmpty()
   phoneNumber: string;
